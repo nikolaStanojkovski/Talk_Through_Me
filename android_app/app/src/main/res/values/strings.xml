@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Talk Through Me</string>
+    <string name="text_speak">Speak</string>
+    <string name="speak_input_hint_text">Input the text you want to speak</string>
+    <string name="audio_generated_message">Successfully generated an audio file.</string>
+    <string name="progress_dialog_message">Loading components…</string>
+</resources>
