@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Talk Through Me</string>
+    <string name="app_id">mk.ukim.finki.talkthroughme</string>
+    <string name="text_speak">Speak</string>
+    <string name="speak_input_hint_text">Input the text you want to speak</string>
+    <string name="audio_generated_message">Successfully generated an audio file.</string>
+    <string name="progress_dialog_message">Loading components…</string>
+
+    <!-- Notifications strings -->
+    <string name="notification_content_text">There is currently no ongoing label inference</string>
+    <string name="notification_content_text_progress">Label inference in progress...</string>
+    <string name="notification_inference_finished">Inference finished</string>
+    <string name="notification_error_message">The application cannot show notifications on your device type</string>
+
+</resources>
