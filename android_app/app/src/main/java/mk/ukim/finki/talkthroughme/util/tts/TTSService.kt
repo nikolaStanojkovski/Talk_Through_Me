@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mk.ukim.finki.talkthroughme.R
+import mk.ukim.finki.talkthroughme.util.Constants
 import mk.ukim.finki.talkthroughme.util.NotificationUtils
 import java.io.File
 
@@ -31,7 +32,7 @@ class TTSService : Service() {
     override fun onBind(intent: Intent?): IBinder {
         receiveInferenceUpdate()
         LocalBroadcastManager.getInstance(this)
-            .registerReceiver(ttsReceiver, IntentFilter("tts_inference_update"))
+            .registerReceiver(ttsReceiver, IntentFilter(Constants.TTS_INFERENCE_BROADCAST_NAME))
         startModel()
 
         return Binder()
@@ -40,7 +41,7 @@ class TTSService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         receiveInferenceUpdate()
         LocalBroadcastManager.getInstance(this)
-            .registerReceiver(ttsReceiver, IntentFilter("tts_inference_update"))
+            .registerReceiver(ttsReceiver, IntentFilter(Constants.TTS_INFERENCE_BROADCAST_NAME))
         startModel()
 
         return super.onStartCommand(intent, flags, startId)
@@ -56,9 +57,9 @@ class TTSService : Service() {
         CoroutineScope(Dispatchers.IO).launch {
             val py: Python = Python.getInstance()
 
-            val synthesizeObject = py.getModule("synthesize_android")
-            val model = synthesizeObject.callAttr("get_static_model")
-            val vocoder = synthesizeObject.callAttr("get_static_vocoder")
+            val synthesizeObject = py.getModule(Constants.SYNTHESIZE_FUNCTION_NAME)
+            val model = synthesizeObject.callAttr(Constants.STATIC_MODEL_FUNCTION_NAME)
+            val vocoder = synthesizeObject.callAttr(Constants.VOCODER_FUNCTION_NAME)
 
             TTSUtils.synthesize_object = synthesizeObject
             TTSUtils.model = model
@@ -73,11 +74,11 @@ class TTSService : Service() {
 
     private fun inferenceModel(textValue: String) {
         if (notificationReference != null) {
-            NotificationUtils.updateNotificationProgress(notificationReference!!, false)
+            NotificationUtils.updateNotificationProgress(applicationContext, notificationReference!!, false)
         }
 
         TTSUtils.synthesize_object!!.callAttr(
-            "main",
+            Constants.MAIN_FUNCTION_NAME,
             textValue,
             TTSUtils.model,
             TTSUtils.vocoder
@@ -90,15 +91,15 @@ class TTSService : Service() {
         ).show()
 
         if (notificationReference != null) {
-            NotificationUtils.updateNotificationProgress(notificationReference!!, true)
+            NotificationUtils.updateNotificationProgress(applicationContext, notificationReference!!, true)
         }
         playFile(textValue)
     }
 
     private fun playFile(textValue: String) {
         val path = getExternalFilesDir(null)
-        val audioFile = File(path, "../${textValue}.wav")
-        val spectrogramFile = File(path, "../${textValue}.png")
+        val audioFile = File(path, "../${textValue}${Constants.WAV_EXTENSION}")
+        val spectrogramFile = File(path, "../${textValue}${Constants.PNG_EXTENSION}")
 
         if (audioFile.exists()) {
             MediaPlayer().apply {
@@ -123,7 +124,7 @@ class TTSService : Service() {
                 if (intent?.extras != null) {
                     val bundle: Bundle = intent.extras!!
 
-                    val textToSpeak: String? = bundle.getString("textToSpeak")
+                    val textToSpeak: String? = bundle.getString(Constants.INFERENCE_TEXT)
                     if (!textToSpeak.isNullOrEmpty()) {
                         inferenceModel(textToSpeak)
                     }
@@ -134,15 +135,15 @@ class TTSService : Service() {
     }
 
     private fun sendProgressUpdate() {
-        val activityIntent = Intent("tts_service_update")
-        activityIntent.putExtra("closeProgressDialog", true)
+        val activityIntent = Intent(Constants.TTS_SERVICE_BROADCAST_NAME)
+        activityIntent.putExtra(Constants.CLOSE_PROGRESS_DIALOG, true)
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(activityIntent)
     }
 
     private fun sendInferenceUpdate() {
-        val activityIntent = Intent("tts_service_update")
-        activityIntent.putExtra("inferenceFinished", true)
+        val activityIntent = Intent(Constants.TTS_SERVICE_BROADCAST_NAME)
+        activityIntent.putExtra(Constants.INFERENCE_FINISHED, true)
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(activityIntent)
     }

@@ -8,10 +8,11 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import mk.ukim.finki.talkthroughme.ui.ProgressDialog
+import mk.ukim.finki.talkthroughme.util.Constants
+import mk.ukim.finki.talkthroughme.util.InternetUtils
 import mk.ukim.finki.talkthroughme.util.tts.TTSService
 import mk.ukim.finki.talkthroughme.util.tts.TTSUtils
-import mk.ukim.finki.talkthroughme.ui.ProgressDialog
-import mk.ukim.finki.talkthroughme.util.InternetUtils
 import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
@@ -26,12 +27,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         buttonSpeak = findViewById(R.id.btnSpeak)
-        sharedPreferences = getSharedPreferences("mk.ukim.finki.talkthroughme", MODE_PRIVATE)
+        sharedPreferences = getSharedPreferences(
+            applicationContext.resources.getText(R.string.app_id).toString(),
+            MODE_PRIVATE
+        )
 
         if (TTSUtils.model == null && TTSUtils.synthesize_object == null && TTSUtils.vocoder == null) {
             if (checkFirstRun()) {
                 if (InternetUtils.hasActiveInternetConnection(this)) {
-                    sharedPreferences.edit().putBoolean("firstrun", false).apply()
+                    sharedPreferences.edit().putBoolean(Constants.FIRST_APPLICATION_RUN, false)
+                        .apply()
                     initModels()
                 } else {
                     progressDialog = ProgressDialog(this).build()
@@ -58,12 +63,15 @@ class MainActivity : AppCompatActivity() {
         progressDialog.show()
         receiveTTSInferenceUpdate()
         LocalBroadcastManager.getInstance(this)
-            .registerReceiver(ttsServiceReceiver, IntentFilter("tts_service_update"))
+            .registerReceiver(
+                ttsServiceReceiver,
+                IntentFilter(Constants.TTS_SERVICE_BROADCAST_NAME)
+            )
         startTTSService()
     }
 
     private fun checkFirstRun(): Boolean {
-        return (sharedPreferences.getBoolean("firstrun", true))
+        return (sharedPreferences.getBoolean(Constants.FIRST_APPLICATION_RUN, true))
     }
 
     private fun receiveTTSInferenceUpdate() {
@@ -73,8 +81,9 @@ class MainActivity : AppCompatActivity() {
                     val bundle: Bundle = intent.extras!!
 
                     val closeProgressDialog: Boolean =
-                        bundle.getBoolean("closeProgressDialog", false)
-                    val inferenceFinished: Boolean = bundle.getBoolean("inferenceFinished", false)
+                        bundle.getBoolean(Constants.CLOSE_PROGRESS_DIALOG, false)
+                    val inferenceFinished: Boolean =
+                        bundle.getBoolean(Constants.INFERENCE_FINISHED, false)
                     if (closeProgressDialog) {
                         progressDialog.dismiss()
                     }

@@ -16,13 +16,7 @@ class NotificationUtils {
 
         private lateinit var notificationManager: NotificationManager
         private const val CHANNEL_ID = 1000
-        private const val CHANNEL_NAME = "mk.ukim.finki.talkthroughme"
-
         private const val progressMax = 100
-        private const val contentTitle = "Assistive Bus Helper"
-        private const val contentTextPlaceholder = "There is currently no ongoing label inference"
-        private const val contentTextProgress = "Label inference in progress..."
-        private const val contentTextFinish = "Inference finished"
 
         fun showNotification(context: Context): NotificationCompat.Builder? {
 
@@ -36,7 +30,7 @@ class NotificationUtils {
             } else {
                 Toast.makeText(
                     context,
-                    "The application cannot show notifications on your device type",
+                    context.resources.getText(R.string.notification_error_message).toString(),
                     Toast.LENGTH_LONG
                 ).show()
 
@@ -45,14 +39,20 @@ class NotificationUtils {
         }
 
         fun updateNotificationProgress(
+            context: Context,
             notification: NotificationCompat.Builder,
             isFinished: Boolean
         ) {
             if (isFinished) {
-                notification.setContentText(contentTextFinish)
+                notification.setContentText(
+                    context.resources.getText(R.string.notification_inference_finished).toString()
+                )
                     .setProgress(0, 0, false)
             } else {
-                notification.setContentText(contentTextProgress)
+                notification.setContentText(
+                    context.resources.getText(R.string.notification_content_text_progress)
+                        .toString()
+                )
                     .setProgress(progressMax, progressMax / 2, true)
             }
 
@@ -73,10 +73,15 @@ class NotificationUtils {
             context: Context
         ): NotificationCompat.Builder {
 
-            return NotificationCompat.Builder(context, CHANNEL_NAME)
+            return NotificationCompat.Builder(
+                context,
+                context.resources.getText(R.string.app_id).toString()
+            )
                 .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setContentTitle(contentTitle)
-                .setContentText(contentTextPlaceholder)
+                .setContentTitle(context.resources.getText(R.string.app_name).toString())
+                .setContentText(
+                    context.resources.getText(R.string.notification_content_text).toString()
+                )
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setOngoing(true)
                 .setAutoCancel(false)
@@ -89,8 +94,8 @@ class NotificationUtils {
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val notificationChannel =
                 NotificationChannel(
-                    CHANNEL_NAME,
-                    contentTextPlaceholder,
+                    context.resources.getText(R.string.app_id).toString(),
+                    context.resources.getText(R.string.notification_content_text).toString(),
                     NotificationManager.IMPORTANCE_HIGH
                 )
             notificationChannel.enableLights(true)

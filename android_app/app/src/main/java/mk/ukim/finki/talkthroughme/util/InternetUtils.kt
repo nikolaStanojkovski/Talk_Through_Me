@@ -3,7 +3,7 @@ package mk.ukim.finki.talkthroughme.util
 import android.content.Context
 import android.net.ConnectivityManager
 
-@Suppress("DEPRECATION")
+@Suppress(Constants.DEPRECATION)
 class InternetUtils {
 
     companion object {
@@ -19,12 +19,12 @@ class InternetUtils {
             val netInfo = cm!!.allNetworkInfo
             for (ni in netInfo) {
                 if (ni.typeName.equals(
-                        "WIFI",
+                        Constants.WIFI,
                         ignoreCase = true
                     )
                 ) if (ni.isConnected) haveConnectedWifi = true
                 if (ni.typeName.equals(
-                        "MOBILE",
+                        Constants.MOBILE,
                         ignoreCase = true
                     )
                 ) if (ni.isConnected) haveConnectedMobile = true

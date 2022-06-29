@@ -59,7 +59,7 @@ class ProgressDialog(context: Context) {
     private fun createTextView(llParam: LinearLayout.LayoutParams): TextView {
         val tvText = TextView(buildContext)
         tvText.text = buildContext.resources.getText(R.string.progress_dialog_message)
-        tvText.setTextColor(Color.parseColor("#000000"))
+        tvText.setTextColor(Color.BLACK)
         tvText.textSize = 20f
         tvText.layoutParams = llParam
         return tvText
